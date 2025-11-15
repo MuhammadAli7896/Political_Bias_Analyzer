@@ -1,0 +1,56 @@
+For Simple Vector Machine classification 
+Dataset division
+bias_rating
+Left      3000
+Right     3000
+Center    1000
+
+TF-IDF Vectors shape
+(4480, 12060)X train shape
+(1120, 12060)y train shape
+(4480,)X test shape
+(1120,)y test shape
+
+Phase 1 Type Classification
+Label = Left, Right, Center
+[[402   2  97]
+ [ 80   5  71]
+ [134   0 329]]
+              precision    recall  f1-score   support
+
+           0       0.65      0.80      0.72       501
+           1       0.71      0.03      0.06       156
+           2       0.66      0.71      0.69       463
+
+    accuracy                           0.66      1120
+   macro avg       0.68      0.52      0.49      1120
+weighted avg       0.67      0.66      0.61      1120
+
+0.6571428571428571
+
+
+
+Phase 2 Subtype Classification
+
+[[181   6  17   0   0   0   0]
+ [  4 198   1   0   0   0   0]
+ [ 21   1 149   0   0   0   0]
+ [  0   0   0 181   0   0   0]
+ [  0   0   0   0 153   3  59]
+ [  0   0   0   0   1 198   9]
+ [  0   0   0   0  19   7 192]]
+              precision    recall  f1-score   support
+
+           0       0.88      0.89      0.88       204
+           1       0.97      0.98      0.97       203
+           2       0.89      0.87      0.88       171
+           3       1.00      1.00      1.00       181
+           4       0.88      0.71      0.79       215
+           5       0.95      0.95      0.95       208
+           6       0.74      0.88      0.80       218
+
+    accuracy                           0.89      1400
+   macro avg       0.90      0.90      0.90      1400
+weighted avg       0.90      0.89      0.89      1400
+
+0.8942857142857142

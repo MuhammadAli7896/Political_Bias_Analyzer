@@ -1,0 +1,51 @@
+For Roberta Sequence classifier
+phase 1 Classification
+Labels = Left Center Right
+
+Learning Rate = 2e-5
+Epochs = 3
+Dataset = 15,000+ rows
+Epoch	Training Loss	Validation Loss	Accuracy
+1	0.852700	0.745107	0.610000
+2	0.755000	0.693516	0.651429
+3	0.599100	0.676014	0.67857
+
+Learning Rate = 5e-6
+Epochs = 4
+Epoch	Training Loss	Validation Loss	Accuracy	F1
+1	0.055900	1.726370	0.602564	0.585452
+2	0.031200	2.035950	0.605413	0.590195
+3	0.028100	2.215195	0.605413	0.587245
+4	0.022300	2.315756	0.599715	0.581708
+
+Learning Rate = 2e-5
+Epochs = 3
+Dataset = 12,000 rows aproximately
+Epoch	Training Loss	Validation Loss	Accuracy	F1
+1	1.137800	0.927775	0.564286	0.504310
+2	0.901400	0.857229	0.603571	0.593989
+3	0.666600	0.781877	0.643571	0.638551
+
+
+Phase 2 Subtype Classification 
+Evaluation Results:
+Accuracy:  60.54%
+Precision: 64.92%
+Recall:    60.54%
+F1 Score:  59.02%
+
+Detailed Classification Report:
+              precision    recall  f1-score   support
+
+  Capitalist       0.63      0.91      0.74        99
+      Center       0.92      0.23      0.37        99
+Conservative       0.36      0.35      0.35       103
+     Liberal       0.63      0.59      0.61        97
+ Nationalist       0.75      0.81      0.78       101
+     Secular       0.80      0.65      0.72       101
+   Socialist       0.47      0.70      0.56       102
+
+    accuracy                           0.61       702
+   macro avg       0.65      0.61      0.59       702
+weighted avg       0.65      0.61      0.59       702
+

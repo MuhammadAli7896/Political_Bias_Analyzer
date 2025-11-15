@@ -1,0 +1,80 @@
+For Bert uncased Classifier
+Phase 1 Type Classification
+Labels = Left Right Center
+Learning rate = 3e-5
+Epochs = 4
+Model trained a
+Epoch 1/4: 100%|██████████| 350/350 [03:48<00:00,  1.53it/s]
+Epoch 1: Train Loss=0.8770, Val Acc=0.6293, Val F1=0.6319
+Epoch 2/4: 100%|██████████| 350/350 [03:44<00:00,  1.56it/s]
+Epoch 2: Train Loss=0.6548, Val Acc=0.6743, Val F1=0.6773
+Epoch 3/4: 100%|██████████| 350/350 [03:44<00:00,  1.56it/s]
+Epoch 3: Train Loss=0.4503, Val Acc=0.7043, Val F1=0.7060
+Epoch 4/4: 100%|██████████| 350/350 [03:44<00:00,  1.56it/s]
+Epoch 4: Train Loss=0.2515, Val Acc=0.7014, Val F1=0.7036
+
+Phase 2 Subtype Classification 
+Labels = Conservative, Capitalist, Nationalist, Liberal, Secular, Socialist
+Validation Accuracy: 0.4665
+              precision    recall  f1-score   support
+
+           0       0.25      0.08      0.12        65
+           1       0.56      0.68      0.61       836
+           2       0.50      0.41      0.45       665
+           3       0.36      0.51      0.42       596
+           4       0.29      0.20      0.24       119
+           5       0.00      0.00      0.00        51
+           6       0.00      0.00      0.00       176
+
+    accuracy                           0.47      2508
+   macro avg       0.28      0.27      0.26      2508
+weighted avg       0.42      0.47      0.44      2508
+
+Epoch 2/4
+Validation Accuracy: 0.4549
+              precision    recall  f1-score   support
+
+           0       0.22      0.18      0.20        65
+           1       0.55      0.64      0.59       836
+           2       0.48      0.43      0.46       665
+           3       0.36      0.46      0.40       596
+           4       0.27      0.23      0.25       119
+           5       0.38      0.06      0.10        51
+           6       0.19      0.02      0.03       176
+
+    accuracy                           0.45      2508
+   macro avg       0.35      0.29      0.29      2508
+weighted avg       0.44      0.45      0.44      2508
+
+Epoch 3/4
+Validation Accuracy: 0.4545
+              precision    recall  f1-score   support
+
+           0       0.22      0.15      0.18        65
+           1       0.56      0.61      0.59       836
+           2       0.47      0.47      0.47       665
+           3       0.36      0.46      0.40       596
+           4       0.28      0.24      0.26       119
+           5       0.38      0.06      0.10        51
+           6       0.08      0.01      0.01       176
+
+    accuracy                           0.45      2508
+   macro avg       0.33      0.29      0.29      2508
+weighted avg       0.43      0.45      0.44      2508
+
+Epoch 4/4
+Validation Accuracy: 0.4545
+              precision    recall  f1-score   support
+
+           0       0.22      0.15      0.18        65
+           1       0.56      0.61      0.59       836
+           2       0.47      0.47      0.47       665
+           3       0.36      0.46      0.40       596
+           4       0.28      0.24      0.26       119
+           5       0.38      0.06      0.10        51
+           6       0.08      0.01      0.01       176
+
+    accuracy                           0.45      2508
+   macro avg       0.33      0.29      0.29      2508
+weighted avg       0.43      0.45      0.44      2508
+

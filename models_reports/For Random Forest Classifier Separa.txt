@@ -1,0 +1,46 @@
+For Random Forest Classifier Separate
+Phase 1 Type Classifier 
+LAbel = Left, Right, Center
+
+             precision    recall  f1-score   support
+
+           0       0.68      0.76      0.72       641
+           1       0.41      0.12      0.18       181
+           2       0.65      0.71      0.68       578
+
+    accuracy                           0.66      1400
+   macro avg       0.58      0.53      0.53      1400
+weighted avg       0.63      0.66      0.63      1400
+
+Accuracy: 0.6557142857142857
+Confusion Matrix:
+ [[486  10 145]
+ [ 81  21  79]
+ [147  20 411]]
+
+Phase 2 Subtype Classifier
+Labels = 7
+
+Confusion Matrix:
+ [[170   8  24   2   0   0   0]
+ [  5 196   2   0   0   0   0]
+ [ 13   2 156   0   0   0   0]
+ [  0   5   5 171   0   0   0]
+ [  0   3   3   2 150   1  56]
+ [  0   0   1   0   1 198   8]
+ [  0   6   3   0  13   2 194]]
+              precision    recall  f1-score   support
+
+           0       0.90      0.83      0.87       204
+           1       0.89      0.97      0.93       203
+           2       0.80      0.91      0.85       171
+           3       0.98      0.94      0.96       181
+           4       0.91      0.70      0.79       215
+           5       0.99      0.95      0.97       208
+           6       0.75      0.89      0.82       218
+
+    accuracy                           0.88      1400
+   macro avg       0.89      0.89      0.88      1400
+weighted avg       0.89      0.88      0.88      1400
+
+Accuracy: 0.8821428571428571
