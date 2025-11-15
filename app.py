@@ -11,9 +11,10 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from ddgs import DDGS
 from firecrawl import Firecrawl
+import os
 
 # ------------------ FIRECRAWL CONFIG ------------------
-firecrawl = Firecrawl(api_key="fc-1f9c34727ff04d6883b79a7b51f494f8")
+firecrawl = Firecrawl(api_key=os.getenv("FIRECRAWL_API_KEY"))
 
 # ------------------ STREAMLIT CONFIG ------------------
 st.set_page_config(
