@@ -307,6 +307,11 @@ BRAVE_API_KEY=your_brave_api_key_here
 - Email: muhammadali30804@gmail.com
 - Project Link: [https://github.com/MuhammadAli7896/NLP-Project](https://github.com/MuhammadAli7896/NLP-Project)
 
+**Azlan (Contributor)**
+
+- GitHub: [@Azlan36](https://github.com/Azlan36)
+- Email: asim4500189@cloud.neduet.edu.pk
+
 ## 🙏 Acknowledgments
 
 - BERT model from [Hugging Face Transformers](https://huggingface.co/transformers/)
