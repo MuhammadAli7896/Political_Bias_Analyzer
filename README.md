@@ -18,8 +18,6 @@ An advanced Natural Language Processing application that detects and classifies 
 - [Project Structure](#project-structure)
 - [API Keys Setup](#api-keys-setup)
 - [Technologies Used](#technologies-used)
-- [Contributing](#contributing)
-- [License](#license)
 - [Contact](#contact)
 
 ## 🎯 Overview
@@ -301,29 +299,6 @@ BRAVE_API_KEY=your_brave_api_key_here
 - **python-dotenv**: Environment variable management
 - **joblib**: Model serialization
 
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Areas for Contribution
-
-- Additional model implementations (RoBERTa, GPT-based models)
-- Multi-language support
-- Improved web scraping capabilities
-- Enhanced UI/UX features
-- Performance optimizations
-- Documentation improvements
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 📧 Contact
 
 **Muhammad Ali**
@@ -342,14 +317,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [ ] Batch processing for multiple articles
 - [ ] Export functionality (PDF, CSV reports)
-- [ ] Historical analysis tracking
 - [ ] Visualization dashboard with charts
 - [ ] Browser extension for on-the-fly analysis
 - [ ] API endpoint for third-party integration
-- [ ] Multi-language support
-- [ ] Explainable AI features (highlight bias-indicating phrases)
-- [ ] Mobile app version
-- [ ] Cloud deployment
 
 ---
 
