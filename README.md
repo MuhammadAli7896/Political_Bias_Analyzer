@@ -1,4 +1,4 @@
-# 🗳️ Political Bias Analyzer
+# Political Bias Analyzer
 
 An advanced Natural Language Processing application that detects and classifies political bias in news articles using state-of-the-art machine learning models including BERT, SVM, and Random Forest classifiers.
 
@@ -6,7 +6,7 @@ An advanced Natural Language Processing application that detects and classifies 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-FF4B4B.svg)](https://streamlit.io)
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
@@ -20,7 +20,7 @@ An advanced Natural Language Processing application that detects and classifies 
 - [Technologies Used](#technologies-used)
 - [Contact](#contact)
 
-## 🎯 Overview
+## Overview
 
 The Political Bias Analyzer helps users understand the political orientation of news articles by automatically classifying them into:
 
@@ -29,33 +29,33 @@ The Political Bias Analyzer helps users understand the political orientation of 
 
 This tool addresses the growing concern of media bias and helps users make informed decisions by providing objective, data-driven insights into news content.
 
-## ✨ Features
+## Features
 
-### 🤖 Multi-Model Analysis
+### Multi-Model Analysis
 - **BERT Classification**: Deep semantic understanding with confidence scores
 - **SVM Classification**: Fast traditional ML predictions with bias and subtype detection
 - **Random Forest**: Ensemble-based robust classification
 
-### 📰 Flexible Input Methods
+### Flexible Input Methods
 - **URL Analysis**: Paste any news article URL for automatic scraping and analysis
 - **Text Paste**: Directly paste article content for instant analysis
 - **News Search**: Search for articles by topic using integrated search APIs
 
-### 🎨 Professional User Interface
+### Professional User Interface
 - Clean, modern design with blue gradient theme
 - Responsive layout for all devices
 - Real-time feedback and loading indicators
 - Color-coded confidence levels
 - Persistent article summaries
 
-### 🔧 Advanced Features
+### Advanced Features
 - Automated web scraping with Firecrawl API
 - Smart content cleaning (removes ads, navigation, boilerplate)
 - Comprehensive error handling with retry logic
 - Environment variable-based configuration
 - Auto-reload functionality for development
 
-## 🎬 Demo
+## Demo
 
 ### Interface Preview
 The application features three main sections:
@@ -78,7 +78,7 @@ SVM Classification:
 └─ Subtype: Liberal
 ```
 
-## 🚀 Installation
+## Installation
 
 ### Prerequisites
 
@@ -139,7 +139,7 @@ Ensure the following model files are present:
 - `models/seperate_vectorizer2.joblib`
 - `models/seperate_subtype_model.pkl`
 
-## 💻 Usage
+## Usage
 
 ### Running the Streamlit Application
 
@@ -173,7 +173,7 @@ The application will open in your default browser at `http://localhost:8501`
 5. Click on an article link
 6. Copy the URL and use Method 1 to analyze
 
-## 🤖 Models
+## Models
 
 ### BERT Classifier
 
@@ -195,7 +195,7 @@ The application will open in your default browser at `http://localhost:8501`
 - **Features**: Resistant to overfitting, feature importance analysis
 - **Output**: Bias and subtype predictions
 
-## 📊 Dataset
+## Dataset
 
 - **Total Records**: 26,810 labeled news articles
 - **Source**: `dataset_making/final_validated.csv`
@@ -214,7 +214,7 @@ The application will open in your default browser at `http://localhost:8501`
 - Center (Neutral)
 - Capitalist, Conservative, Nationalist (Right-leaning)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 NLP-Project/
@@ -250,7 +250,7 @@ NLP-Project/
     └── [Model performance reports]
 ```
 
-## 🔑 API Keys Setup
+## API Keys Setup
 
 The application requires API keys for full functionality. Create a `.env` file in the project root:
 
@@ -276,7 +276,7 @@ BRAVE_API_KEY=your_brave_api_key_here
 
 **Note**: The application uses DuckDuckGo search as a fallback if Brave API is not configured.
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 ### Core Technologies
 - **Python 3.11**: Primary programming language
@@ -299,7 +299,7 @@ BRAVE_API_KEY=your_brave_api_key_here
 - **python-dotenv**: Environment variable management
 - **joblib**: Model serialization
 
-## 📧 Contact
+## Contact
 
 **Muhammad Ali**
 
@@ -307,18 +307,18 @@ BRAVE_API_KEY=your_brave_api_key_here
 - Email: muhammadali30804@gmail.com
 - Project Link: [https://github.com/MuhammadAli7896/NLP-Project](https://github.com/MuhammadAli7896/NLP-Project)
 
-**Azlan (Contributor)**
+**Azlan (Team Member)**
 
 - GitHub: [@Azlan36](https://github.com/Azlan36)
 - Email: asim4500189@cloud.neduet.edu.pk
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - BERT model from [Hugging Face Transformers](https://huggingface.co/transformers/)
 - Dataset sources and contributors
 - Open-source community for various libraries and tools
 
-## 📈 Future Enhancements
+## Future Enhancements
 
 - [ ] Batch processing for multiple articles
 - [ ] Export functionality (PDF, CSV reports)
@@ -330,8 +330,8 @@ BRAVE_API_KEY=your_brave_api_key_here
 
 <div align="center">
 
-**Made with ❤️ for promoting media literacy and informed news consumption**
+**Made for promoting media literacy and informed news consumption**
 
-⭐ Star this repository if you find it helpful!
+Star this repository if you find it helpful!
 
 </div>
