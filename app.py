@@ -4,7 +4,7 @@ import torch
 import joblib
 import re
 import numpy as np
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.sparse import hstack
 from nltk.corpus import stopwords
@@ -12,6 +12,9 @@ from nltk.stem import WordNetLemmatizer
 from ddgs import DDGS
 from firecrawl import Firecrawl
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ------------------ FIRECRAWL CONFIG ------------------
 firecrawl = Firecrawl(api_key=os.getenv("FIRECRAWL_API_KEY"))
@@ -147,8 +150,8 @@ def clean_text(text):
 # ------------------ MODEL LOAD ------------------
 @st.cache_resource
 def load_models():
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-    bert_model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=7)
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+    bert_model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=7)
     bert_model.load_state_dict(torch.load("bert_weights/bert_type_classifier.pt", map_location=torch.device("cpu")), strict=False)
     bert_model.eval()
 
@@ -206,17 +209,76 @@ rf_subtype_id2label = svm_subtype_id2label
 
 # ------------------ DUCKDUCKGO SEARCH ------------------
 def ddg_news_search(query: str, top_k: int = 5):
-    """Fetch top news results from DuckDuckGo instead of Brave."""
+    """Fetch top news results from DuckDuckGo with Brave Search as backup."""
     try:
         results = []
         with DDGS() as ddgs:
-            for r in ddgs.text(query, max_results=top_k, region="us-en"):
+            for r in ddgs.news(query, max_results=top_k, region="us-en"):
                 title = r.get("title") or "Untitled"
-                url = r.get("href") or r.get("url") or ""
+                url = r.get("url") or r.get("href") or ""
                 if title and url:
                     results.append({"title": title, "url": url})
         return results
-    except Exception:
+    except Exception as e:
+        # If DuckDuckGo fails, try Brave Search as backup
+        st.info("DuckDuckGo search failed, trying Brave Search as backup...")
+        return brave_news_search(query, top_k)
+
+# ------------------ BRAVE SEARCH (BACKUP) ------------------
+def brave_news_search(query: str, top_k: int = 5):
+    """Fetch top news results from Brave Search API as backup."""
+    brave_api_key = os.getenv("BRAVE_API_KEY")
+    
+    if not brave_api_key:
+        return []
+    
+    try:
+        headers = {
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip",
+            "X-Subscription-Token": brave_api_key
+        }
+        
+        params = {
+            "q": query,
+            "count": top_k,
+            "search_lang": "en",
+            "country": "us",
+            "freshness": "pw"  # Past week for recent news
+        }
+        
+        response = requests.get(
+            "https://api.search.brave.com/res/v1/web/search",
+            headers=headers,
+            params=params,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            results = []
+            
+            # Extract results from Brave API response
+            web_results = data.get("web", {}).get("results", [])
+            
+            for item in web_results[:top_k]:
+                title = item.get("title", "Untitled")
+                url = item.get("url", "")
+                
+                # Filter out non-news domains
+                excluded_domains = [
+                    'wikipedia.org', 'facebook.com', 'twitter.com', 'reddit.com',
+                    'youtube.com', 'instagram.com', 'tiktok.com', 'linkedin.com'
+                ]
+                
+                if url and not any(domain in url.lower() for domain in excluded_domains):
+                    results.append({"title": title, "url": url})
+            
+            return results[:top_k]
+        else:
+            return []
+            
+    except Exception as e:
         return []
 
 # ------------------ FIRECRAWL SCRAPER ------------------
@@ -304,10 +366,11 @@ if option == "Search News Topic":
                 st.markdown('<div class="success-box"><strong>Search Results:</strong> Found ' + str(len(results)) + ' articles</div>', unsafe_allow_html=True)
                 st.markdown("### Top Articles")
                 
+                # Display articles with inline copyable URLs
                 for idx, r in enumerate(results, 1):
-                    st.markdown(f"{idx}. [{r['title']}]({r['url']})", unsafe_allow_html=True)
-                
-                st.markdown('<div class="info-box">Click on an article link above, then copy the URL and use the "Paste Article Link" option to analyze it.</div>', unsafe_allow_html=True)
+                    st.markdown(f"**{idx}. [{r['title']}]({r['url']})**")
+                    st.code(r['url'], language=None)
+                    st.markdown("---")
             else:
                 st.markdown('<div class="warning-box">No articles found. Try a different search term.</div>', unsafe_allow_html=True)
         else:
@@ -317,12 +380,6 @@ if option == "Search News Topic":
 elif option == "Paste Article Link":
     st.markdown("### Analyze Article from URL")
     
-    input_url = st.text_input(
-        "Paste the article URL:",
-        placeholder="https://example.com/news-article",
-        help="Enter the full URL of the news article you want to analyze"
-    )
-
     # Initialize session variables once
     if "article_text" not in st.session_state:
         st.session_state.article_text = ""
@@ -330,6 +387,12 @@ elif option == "Paste Article Link":
         st.session_state.summary = ""
     if "url_fetched" not in st.session_state:
         st.session_state.url_fetched = ""
+    
+    input_url = st.text_input(
+        "Paste the article URL:",
+        placeholder="https://example.com/news-article",
+        help="Enter the full URL of the news article you want to analyze"
+    )
 
     fetch_clicked = st.button("Fetch Article", key="fetch_btn")
 
@@ -341,13 +404,9 @@ elif option == "Paste Article Link":
             st.session_state.article_text = clean_text(text)
             st.session_state.summary = summary
             st.session_state.url_fetched = input_url
-            st.markdown('<div class="success-box"><strong>Success:</strong> Article fetched and processed successfully.</div>', unsafe_allow_html=True)
+            st.markdown('<div class="success-box"><strong>Success:</strong> Article fetched and processed successfully. Click "Analyze Article" below to see results.</div>', unsafe_allow_html=True)
         else:
             st.markdown('<div class="warning-box"><strong>Warning:</strong> No text could be extracted from the URL.</div>', unsafe_allow_html=True)
-    
-    # Display summary if it exists in session state
-    if st.session_state.get("summary", "").strip():
-        st.markdown('<div class="info-box"><strong>Article Summary:</strong><br>' + st.session_state.summary + '</div>', unsafe_allow_html=True)
 
 
 
@@ -365,72 +424,74 @@ elif option == "Manual Text Entry":
         st.markdown(f'<div class="info-box"><strong>Text Length:</strong> {len(article_text)} characters</div>', unsafe_allow_html=True)
 
 # ------------------ RUN ANALYSIS ------------------
-st.markdown("---")
-st.markdown("## Analysis")
+# Only show analyze button if not in Search News Topic tab
+if option != "Search News Topic":
+    st.markdown("---")
+    st.markdown("## Analysis")
 
-if st.button("Analyze Article", key="analyze_btn", type="primary"):
-    article_text = st.session_state.get("article_text", "").strip()
-    
-    if not article_text:
-        st.markdown('<div class="warning-box"><strong>Warning:</strong> Please fetch or enter an article first.</div>', unsafe_allow_html=True)
-    else:
-        # Display summary before analysis if it exists
-        if st.session_state.get("summary", "").strip():
-            st.markdown('<div class="info-box"><strong>Article Summary:</strong><br>' + st.session_state.summary + '</div>', unsafe_allow_html=True)
+    if st.button("Analyze Article", key="analyze_btn", type="primary"):
+        article_text = st.session_state.get("article_text", "").strip()
         
-        with st.spinner("Analyzing article with multiple models..."):
-            # Predictions
-            bert_bias, bert_conf = predict_with_bert(article_text)
-            svm_bias, svm_subtype = predict_with_svm(article_text, bert_bias)
-            # rf_bias, rf_subtype = predict_with_rf(article_text)
+        if not article_text:
+            st.markdown('<div class="warning-box"><strong>Warning:</strong> Please fetch or enter an article first.</div>', unsafe_allow_html=True)
+        else:
+            # Display summary before analysis if it exists
+            if st.session_state.get("summary", "").strip():
+                st.markdown('<div class="info-box"><strong>Article Summary:</strong><br>' + st.session_state.summary + '</div>', unsafe_allow_html=True)
+            
+            with st.spinner("Analyzing article with multiple models..."):
+                # Predictions
+                bert_bias, bert_conf = predict_with_bert(article_text)
+                svm_bias, svm_subtype = predict_with_svm(article_text, bert_bias)
+                # rf_bias, rf_subtype = predict_with_rf(article_text)
 
-        # Display results with professional styling
-        st.markdown("### Analysis Results")
-        st.markdown("---")
-        
-        # BERT Results
-        col1, col2 = st.columns([3, 1])
-        with col1:
+            # Display results with professional styling
+            st.markdown("### Analysis Results")
+            st.markdown("---")
+            
+            # BERT Results
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.markdown(f"""
+                    <div class="result-card" style="border-left-color: #3b82f6;">
+                        <div class="result-title">BERT Classification</div>
+                        <div class="result-content">
+                            <strong>Bias:</strong> {bert_bias}<br>
+                            <strong>Confidence:</strong> {bert_conf:.2%}
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                confidence_color = "#10b981" if bert_conf > 0.7 else "#f59e0b" if bert_conf > 0.5 else "#ef4444"
+                st.markdown(f"""
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 2rem; font-weight: bold; color: {confidence_color};">{bert_conf:.0%}</div>
+                        <div style="color: #64748b; font-size: 0.9rem;">Confidence</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            # SVM Results
             st.markdown(f"""
-                <div class="result-card" style="border-left-color: #3b82f6;">
-                    <div class="result-title">BERT Classification</div>
+                <div class="result-card" style="border-left-color: #8b5cf6;">
+                    <div class="result-title">SVM Classification</div>
                     <div class="result-content">
-                        <strong>Bias:</strong> {bert_bias}<br>
-                        <strong>Confidence:</strong> {bert_conf:.2%}
+                        <strong>Bias:</strong> {svm_bias}<br>
+                        <strong>Subtype:</strong> {svm_subtype}
                     </div>
                 </div>
             """, unsafe_allow_html=True)
-        
-        with col2:
-            confidence_color = "#10b981" if bert_conf > 0.7 else "#f59e0b" if bert_conf > 0.5 else "#ef4444"
-            st.markdown(f"""
-                <div style="text-align: center; padding: 1rem;">
-                    <div style="font-size: 2rem; font-weight: bold; color: {confidence_color};">{bert_conf:.0%}</div>
-                    <div style="color: #64748b; font-size: 0.9rem;">Confidence</div>
-                </div>
-            """, unsafe_allow_html=True)
-        
-        # SVM Results
-        st.markdown(f"""
-            <div class="result-card" style="border-left-color: #8b5cf6;">
-                <div class="result-title">SVM Classification</div>
-                <div class="result-content">
-                    <strong>Bias:</strong> {svm_bias}<br>
-                    <strong>Subtype:</strong> {svm_subtype}
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Random Forest Results (commented out)
-        # st.markdown(f"""
-        #     <div class="result-card" style="border-left-color: #ec4899;">
-        #         <div class="result-title">Random Forest Classification</div>
-        #         <div class="result-content">
-        #             <strong>Bias:</strong> {rf_bias}<br>
-        #             <strong>Subtype:</strong> {rf_subtype}
-        #         </div>
-        #     </div>
-        # """, unsafe_allow_html=True)
+            
+            # Random Forest Results (commented out)
+            # st.markdown(f"""
+            #     <div class="result-card" style="border-left-color: #ec4899;">
+            #         <div class="result-title">Random Forest Classification</div>
+            #         <div class="result-content">
+            #             <strong>Bias:</strong> {rf_bias}<br>
+            #             <strong>Subtype:</strong> {rf_subtype}
+            #         </div>
+            #     </div>
+            # """, unsafe_allow_html=True)
 
-        st.markdown("---")
-        st.caption("Analysis completed using fine-tuned machine learning classifiers")
+            st.markdown("---")
+            st.caption("Analysis completed using fine-tuned machine learning classifiers")
