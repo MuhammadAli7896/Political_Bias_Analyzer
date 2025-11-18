@@ -13,241 +13,18 @@ import random
 import gc
 
 device = 0 if torch.cuda.is_available() else -1
-print("✅ Device:", "GPU - " + torch.cuda.get_device_name(0) if device == 0 else "CPU")
+print(" Device:", "GPU - " + torch.cuda.get_device_name(0) if device == 0 else "CPU")
 
 logging.set_verbosity_info()
 
 df = pd.read_csv("political_bias_dataset.csv")
 print(f"Loaded {len(df)} rows from political_bias_dataset.csv")
 
-print("\n⏳ Downloading and initializing the paraphraser model...")
+print("\n Downloading and initializing the paraphraser model...")
 model_name = "google/flan-t5-small"
 
 AutoTokenizer.from_pretrained(model_name)
 AutoModelForSeq2SeqLM.from_pretrained(model_name)
-print("✅ Model cached successfully.")
-
-paraphraser = pipeline("text2text-generation", model=model_name, device=device)
-
-syn_aug = naw.SynonymAug(aug_src='wordnet', aug_min=1, aug_max=3)
-print("✅ Augmenters ready.\n")
-
-def batch_paraphrase(texts, batch_size=16):
-    """Generate paraphrases in batches for efficiency"""
-    paraphrased = []
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i+batch_size]
-        prompts = [f"Paraphrase this: {t}" for t in batch]
-        try:
-            outputs = paraphraser(
-                prompts,
-                max_new_tokens=64,
-                num_return_sequences=1
-            )
-            paraphrased.extend([o['generated_text'] for o in outputs])
-        except Exception as e:
-            print(f"⚠️ Paraphrasing batch {i} failed:", e)
-            paraphrased.extend(batch)  
-        torch.cuda.empty_cache()
-        gc.collect()
-    return paraphrased
-
-augmented_rows = []
-
-print("\n🚀 Starting augmentation process...")
-for subtype, group in tqdm(df.groupby("subtype"), desc="Augmenting by subtype"):
-    texts = group["text"].tolist()
-    labels = group["subtype"].tolist()
-
-    paras = batch_paraphrase(texts)
-    syns = [syn_aug.augment(t) for t in texts]
-
-    for orig, para, syn, label in zip(texts, paras, syns, labels):
-        augmented_rows.append((orig, label))
-        augmented_rows.append((para, label))
-        augmented_rows.append((syn, label))
-
-aug_df = pd.DataFrame(augmented_rows, columns=["text", "subtype"])
-aug_df.to_csv("political_bias_dataset_nlp_aug.csv", index=False)
-print(f"\n✅ Augmentation complete! Generated {len(aug_df)} rows.")
-print("💾 Saved as political_bias_dataset_nlp_aug.csv")
-
-!pip install scikit-learn
-
-import pandas as pd
-from datasets import Dataset
-from transformers import RobertaTokenizerFast, RobertaForSequenceClassification, Trainer, TrainingArguments
-import evaluate
-from sklearn.model_selection import train_test_split
-import torch
-import numpy as np
-
-df = pd.read_csv("dataset.csv")  
-
-label2id = {label: i for i, label in enumerate(df["bias_rating"].unique())}
-id2label = {i: label for label, i in label2id.items()}
-df["label"] = df["bias_rating"].map(label2id)
-
-train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
-
-train_dataset = Dataset.from_pandas(train_df)
-test_dataset = Dataset.from_pandas(test_df)
-
-tokenizer = RobertaTokenizerFast.from_pretrained("roberta-base")
-
-def tokenize(batch):
-    return tokenizer(batch["text"], truncation=True, padding="max_length", max_length=256)
-
-train_dataset = train_dataset.map(tokenize, batched=True)
-test_dataset = test_dataset.map(tokenize, batched=True)
-
-train_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
-test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
-
-model = RobertaForSequenceClassification.from_pretrained(
-    "roberta-base",
-    num_labels=len(label2id),
-    id2label=id2label,
-    label2id=label2id
-)
-
-args = TrainingArguments(
-    output_dir="./roberta_bias",
-    eval_strategy="epoch",
-    learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=3,
-    weight_decay=0.01,
-    save_strategy="epoch",
-)
-
-accuracy = evaluate.load("accuracy")
-
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-    return accuracy.compute(predictions=predictions, references=labels)
-
-trainer = Trainer(
-    model=model,
-    args=args,
-    train_dataset=train_dataset,
-    eval_dataset=test_dataset,
-    tokenizer=tokenizer,
-    compute_metrics=compute_metrics
-)
-
-trainer.train()
-
-model.save_pretrained("roberta_bias_model")
-tokenizer.save_pretrained("roberta_bias_model")
-
-
-
-
-
-
-
-df = pd.read_csv("dataset.csv")  
-
-label2id = {label: i for i, label in enumerate(df["type_of_biasness"].unique())}
-id2label = {i: label for label, i in label2id.items()}
-df["label"] = df["type_of_biasness"].map(label2id)
-
-train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
-
-train_dataset = Dataset.from_pandas(train_df)
-test_dataset = Dataset.from_pandas(test_df)
-
-tokenizer = RobertaTokenizerFast.from_pretrained("roberta-base")
-
-def tokenize(batch):
-    return tokenizer(batch["text"], truncation=True, padding="max_length", max_length=256)
-
-train_dataset = train_dataset.map(tokenize, batched=True)
-test_dataset = test_dataset.map(tokenize, batched=True)
-
-train_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
-test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
-
-model = RobertaForSequenceClassification.from_pretrained(
-    "roberta-base",
-    num_labels=len(label2id),
-    id2label=id2label,
-    label2id=label2id
-)
-
-args = TrainingArguments(
-    output_dir="./roberta_subtype",
-    eval_strategy="epoch",
-    save_strategy="epoch",
-    learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=3,
-    weight_decay=0.01,
-    logging_dir="./logs",
-)
-
-accuracy = evaluate.load("accuracy")
-f1 = evaluate.load("f1")
-
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    preds = np.argmax(logits, axis=-1)
-    acc = accuracy.compute(predictions=preds, references=labels)
-    f1_score = f1.compute(predictions=preds, references=labels, average="weighted")
-    return {"accuracy": acc["accuracy"], "f1": f1_score["f1"]}
-
-trainer = Trainer(
-    model=model,
-    args=args,
-    train_dataset=train_dataset,
-    eval_dataset=test_dataset,
-    tokenizer=tokenizer,
-    compute_metrics=compute_metrics
-)
-
-trainer.train()
-
-model.save_pretrained("roberta_subtype_model")
-tokenizer.save_pretrained("roberta_subtype_model")
-
-!pip install torch transformers scikit-learn
-
-import os
-import torch
-from torch import nn
-from torch.utils.data import DataLoader, Dataset
-from transformers import BertTokenizer, BertModel, get_linear_schedule_with_warmup
-from torch.optim import AdamW
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.preprocessing import LabelEncoder
-import pandas as pd
-
-df = pd.read_csv("final_validated.csv")
-df.head()
-
-df = pd.read_csv("final_validated.csv")
-
-df["text"] = df["text"].astype(str).fillna("")
-
-df = df[df["text"].str.strip() != ""]
-
-df = df.reset_index(drop=True)
-
-unique_labels = df['type_of_biasness'].unique()
-print("Unique Labels:")
-print(unique_labels)
-
-label_encoder = LabelEncoder()
-df['Label'] = label_encoder.fit_transform(df['type_of_biasness'])
-
-texts = df['text'].tolist()
-labels = df['Label'].tolist()
-
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
@@ -263,7 +40,7 @@ class TextClassificationDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_length):
         self.texts = texts
         self.labels = labels
-        self.tokenizer = tokenizerA
+        self.tokenizer = tokenizer
         self.max_length = max_length
 
     def __len__(self):
